@@ -1,12 +1,10 @@
-1) fill storage
-{"date_time":"2021-02-14T15:40:00", "car_number":"1234 PM-1", "speed":12.7}
-{"date_time":"2021-02-14T11:50:00", "car_number":"1234 PM-1", "speed":76.7}
-{"date_time":"2021-02-14T11:50:00", "car_number":"1234 PM-1", "speed":56.7}
-{"date_time":"2021-02-14T11:50:00", "car_number":"1234 PM-1", "speed":97.7}
-
-{"date_time":"2021-02-11T12:40:00", "car_number":"1768 PM-2", "speed":90.7}
-{"date_time":"2021-02-11T12:40:00", "car_number":"1768 PM-2", "speed":89.7}
-{"date_time":"2021-02-11T12:45:00", "car_number":"1768 PM-2", "speed":101.7}
-{"date_time":"2021-02-11T18:45:00", "car_number":"1768 PM-2", "speed":86.7}
-{"date_time":"2021-02-11T13:45:00", "car_number":"1768 PM-2", "speed":78.7}
+[{"date_time":"2021-02-14T15:40:00", "car_name":"1234 PM-1", "speed":12.7},
+{"date_time":"2021-02-14T11:50:00", "car_name":"1234 PM-1", "speed":76.7},
+{"date_time":"2021-02-14T11:50:00", "car_name":"1234 PM-1", "speed":56.7},
+{"date_time":"2021-02-14T11:50:00", "car_name":"1234 PM-1", "speed":97.7},
+{"date_time":"2021-02-11T12:40:00", "car_name":"1768 PM-2", "speed":90.7},
+{"date_time":"2021-02-11T12:40:00", "car_name":"1768 PM-2", "speed":89.7},
+{"date_time":"2021-02-11T12:45:00", "car_name":"1768 PM-2", "speed":101.7},
+{"date_time":"2021-02-11T18:45:00", "car_name":"1768 PM-2", "speed":86.7},
+{"date_time":"2021-02-11T13:45:00", "car_name":"1768 PM-2", "speed":78.7}]
 

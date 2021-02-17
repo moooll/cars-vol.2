@@ -2,7 +2,6 @@ package server
 
 import (
 	"log"
-	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/valyala/fasthttp"
@@ -28,23 +27,13 @@ func minAndMaxSpeedHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func findMinMaxSpeed(minMax dto.MinMaxSpeedReq) (minMaxSpeedResult dto.MinMaxSpeedResp, err error) {
-	// todo: actually find this in storage
-	datetime, err := time.Parse("2006-01-02T15:04:00", "2021-02-14T15:40:00")
+	sortedCars, err := sortSlice(minMax.Date)
 	if err != nil {
 		return dto.MinMaxSpeedResp{}, err
 	}
-
 	minMaxSpeedResult = dto.MinMaxSpeedResp{
-		MinSpeed: dto.CarInformation{
-			DateTime:  datetime,
-			CarNumber: "1234 PM-1",
-			Speed:     40.5,
-		},
-		MaxSpeed: dto.CarInformation{
-			DateTime:  datetime,
-			CarNumber: "1234 PM-1",
-			Speed:     60.5,
-		},
+		MinSpeed: sortedCars[0],
+		MaxSpeed: sortedCars[len(sortedCars)-1],
 	}
 	return minMaxSpeedResult, nil
 }

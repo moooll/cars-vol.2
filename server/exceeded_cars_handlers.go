@@ -49,7 +49,7 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 
 func findCarsWhichExceeded(speedDate dto.SpeedDate) (exceededCars []dto.CarInformation, err error) {
 
-	todaysCars, err := sortSlice(speedDate)
+	todaysCars, err := sortSlice(speedDate.Date)
 	if err != nil {
 		return []dto.CarInformation{}, err
 	}
