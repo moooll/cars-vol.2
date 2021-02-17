@@ -9,6 +9,6 @@ import (
 func main() {
 	err := server.Server()
 	if err != nil {
-		log.Fatal("error launching server: ", err)
+		log.Println("error launching server: ", err)
 	}
 }

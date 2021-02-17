@@ -2,9 +2,14 @@ package dto
 
 import "time"
 
-type SpeedDateReq struct {
+type SpeedDate struct {
 	Speed float64 		`json:"speed"`
 	Date time.Time		`json:"date"`
+}
+
+type SpeedDateReq struct {
+	Speed float64 		`json:"speed"`
+	Date string		`json:"date"`
 }
 
 type CarInformation struct {
