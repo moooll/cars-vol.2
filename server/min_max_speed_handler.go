@@ -19,7 +19,7 @@ func minAndMaxSpeedHandler(ctx *fasthttp.RequestCtx) {
 	minMaxSpeed, err := findMinMaxSpeed(minMax)
 	if err != nil {
 		zap.L().Error("could not find min-max speed")
-		ctx.WriteString("could not find relevant results")
+		ctx.SetBody([]byte("could not find relevant results"))
 	}
 	minMaxBytes, err := ffjson.Marshal(minMaxSpeed)
 	if err != nil {

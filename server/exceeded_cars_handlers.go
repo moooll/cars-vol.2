@@ -18,7 +18,7 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	err := ffjson.Unmarshal(req, &speedDateReq)
 	if err != nil {
 		zap.L().Error("could not unmarshal request: " + err.Error())
-		ctx.WriteString("server error, try later")
+		ctx.WriteString("server error, try later\n")
 	}
 
 	for i, v := range speedDateReq.Date {
@@ -39,15 +39,15 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	exceededCars, err := findCarsWhichExceeded(speedDate)
 	if err != nil {
 		zap.L().Error("could not find cars: " + err.Error())
-		if err.Error() == "didn't find exceeded cars" {
-			ctx.WriteString("no cars exceeded")
-		}
-		ctx.WriteString("server error, try later")
+		// if err.Error() == "didn't find exceeded cars" {
+		// 	ctx.WriteString("no cars exceeded")
+		// }
+		ctx.WriteString("could not find cars\n")
 	}
 	resp, err := ffjson.Marshal(exceededCars)
 	if err != nil {
 		zap.L().Error("could not marshal response: " + err.Error())
-		ctx.WriteString("server error, try later")
+		ctx.WriteString("server error, try later\n")
 	}
 	ctx.SetBody(resp)
 }
