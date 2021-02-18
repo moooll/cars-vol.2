@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
@@ -29,12 +30,12 @@ func Server() error {
 		return err
 	}
 
-	type config struct {
+	type restTime struct {
 		Start int
-		End int
+		End   int
 	}
-	var conf config
-	err = ffjson.Unmarshal(config, conf) 
+	var conf restTime
+	err = ffjson.Unmarshal(config, conf)
 	if err != nil {
 		return err
 	}
