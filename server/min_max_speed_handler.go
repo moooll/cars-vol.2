@@ -26,7 +26,11 @@ func minAndMaxSpeedHandler(ctx *fasthttp.RequestCtx) {
 		zap.L().Error("could not marshal response: " + err.Error())
 		ctx.WriteString("check the input and try later")
 	}
-	ctx.SetBody(minMaxBytes)
+	if string(minMaxBytes) == `{"min_speed":{"date_time":"0001-01-01T00:00:00Z","car_name":"","speed":0},"max_speed":{"date_time":"0001-01-01T00:00:00Z","car_name":"","speed":0}}` {
+		ctx.SetBody([]byte("check the input and try later"))
+	} else {
+		ctx.SetBody(minMaxBytes)
+	}
 }
 
 func findMinMaxSpeed(minMax dto.MinMaxSpeedReq) (minMaxSpeedResult dto.MinMaxSpeedResp, err error) {

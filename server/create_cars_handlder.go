@@ -2,6 +2,7 @@ package server
 
 import (
 	"os"
+	"sync"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
@@ -10,6 +11,11 @@ import (
 
 	"cars/dto"
 )
+
+type carInfoSync struct {
+	carInfo []dto.CarInformation
+	mu      sync.Mutex
+}
 
 func createCarsHandler(ctx *fasthttp.RequestCtx) {
 	reqBody := ctx.PostBody()
@@ -33,25 +39,32 @@ func createCarsHandler(ctx *fasthttp.RequestCtx) {
 	if timeErr != nil {
 		ctx.WriteString("check input: please input date in format yyyy-mm-ddThh:mm:ssZhh:mm (Zhh:mm for time zone)\n")
 	}
-	err = writeToFileVol2(carData)
+	var carInfo carInfoSync
+	carInfo.carInfo = carData
+	err = carInfo.writeToFileVol2()
 	if err != nil {
 		zap.L().Error("could not write to file: " + err.Error())
 		ctx.WriteString("error saving data, try later\n")
 	}
 }
 
-//todo: goroutines here??
-
-func writeToFileVol2(carData []dto.CarInformation) (err error) {
-	for _, v := range carData {
+func (carInfo *carInfoSync) writeToFileVol2() (err error) {
+	for _, v := range carInfo.carInfo {
 		var filename = v.DateTime.Format("2006-01-02") + ".txt"
 		file, err := os.OpenFile("storage/"+filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 		if err != nil {
 			return err
 		}
+
+		defer file.Close()
 		carDataByte, err := ffjson.Marshal(v)
+		if err != nil {
+			return err
+		}
+		carInfo.mu.Lock()
 		file.Write(carDataByte)
 		file.WriteString("\n")
+		carInfo.mu.Unlock()
 	}
 	return nil
 }

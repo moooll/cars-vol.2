@@ -3,17 +3,25 @@ package server
 import (
 	"bytes"
 	"cars/dto"
-	"io/ioutil"
 	"log"
+	"os"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
 	"go.uber.org/zap"
 )
 
+type carDateSync struct {
+	date time.Time
+	mu sync.Mutex
+}
+
 func sortSlice(date time.Time) (todaysCars []dto.CarInformation, err error) {
-	todaysCars, err = readFromFileVol2((date))
+	var carDate carDateSync
+	carDate.date = date
+	todaysCars, err = carDate.readFromFileVol2()
 	if err != nil {
 		return []dto.CarInformation{}, err
 	}
@@ -24,13 +32,16 @@ func sortSlice(date time.Time) (todaysCars []dto.CarInformation, err error) {
 	return todaysCars, nil
 }
 
-func readFromFileVol2(date time.Time) (todaysCars []dto.CarInformation, err error) {
-	var filename = "storage/" + date.Format("2006-01-02") + ".txt"
-	dataFromFile, err := ioutil.ReadFile(filename)
+func (carDate *carDateSync) readFromFileVol2() (todaysCars []dto.CarInformation, err error) {
+	var filename = "storage/" + carDate.date.Format("2006-01-02") + ".txt"
+//	var fileMutex *sync.Mutex
+
+	carDate.mu.Lock()
+	dataFromFile, err := os.ReadFile(filename)
 	if err != nil {
 		return []dto.CarInformation{}, err
 	}
-
+	carDate.mu.Unlock()
 	zap.L().Info(string(string(dataFromFile)))
 	fileDataWithoutSuffix := bytes.TrimSuffix(dataFromFile, []byte("\n"))
 	sliceFromFile := bytes.Split(fileDataWithoutSuffix, []byte("\n"))
