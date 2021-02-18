@@ -1,10 +1,9 @@
 package server
 
 import (
-	"log"
-
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/zap"
 
 	"cars/dto"
 )
@@ -13,14 +12,18 @@ func minAndMaxSpeedHandler(ctx *fasthttp.RequestCtx) {
 	reqBody := ctx.PostBody()
 	var minMax dto.MinMaxSpeedReq
 	err := ffjson.Unmarshal(reqBody, &minMax)
+	if err != nil {
+		zap.L().Error("could not unmarshal body")
+		ctx.WriteString("check the input and try later")
+	}
 	minMaxSpeed, err := findMinMaxSpeed(minMax)
 	if err != nil {
-		log.Println("could not find min-max speed")
+		zap.L().Error("could not find min-max speed")
 		ctx.WriteString("could not find relevant results")
 	}
 	minMaxBytes, err := ffjson.Marshal(minMaxSpeed)
 	if err != nil {
-		log.Println("could not marshal response: ", err)
+		zap.L().Error("could not marshal response: " + err.Error())
 		ctx.WriteString("server error, try later")
 	}
 	ctx.SetBody(minMaxBytes)

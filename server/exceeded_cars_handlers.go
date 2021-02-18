@@ -1,12 +1,12 @@
 package server
 
 import (
-	"log"
 	"sort"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/zap"
 
 	"cars/dto"
 )
@@ -16,9 +16,10 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	var speedDateReq dto.SpeedDateReq
 	err := ffjson.Unmarshal(req, &speedDateReq)
 	if err != nil {
-		log.Println("could not unmarshal request: ", err)
+		zap.L().Error("could not unmarshal request: " +  err.Error())
 		ctx.WriteString("server error, try later")
 	}
+	
 	for i, v := range speedDateReq.Date {
 		if v == 'T' {
 			speedDateReq.Date = speedDateReq.Date[:i]
@@ -26,29 +27,28 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	}
 	date, err := time.Parse("2006-01-02", speedDateReq.Date)
 	if err != nil {
-		log.Println("could not parse time: ", err)
+		zap.L().Error("could not parse time: " + err.Error())
 		ctx.WriteString("check input and try later")
 	}
 
 	var speedDate = dto.SpeedDate{
 		Speed: speedDateReq.Speed,
-		Date: date,
+		Date:  date,
 	}
 	exceededCars, err := findCarsWhichExceeded(speedDate)
 	if err != nil {
-		log.Println("could not find cars: ", err)
+		zap.L().Error("could not find cars: " + err.Error())
 		ctx.WriteString("server error, try later")
 	}
 	resp, err := ffjson.Marshal(exceededCars)
 	if err != nil {
-		log.Println("could not marshal response: ", err)
+		zap.L().Error("could not marshal response: " + err.Error())
 		ctx.WriteString("server error, try later")
 	}
 	ctx.SetBody(resp)
 }
 
 func findCarsWhichExceeded(speedDate dto.SpeedDate) (exceededCars []dto.CarInformation, err error) {
-
 	todaysCars, err := sortSlice(speedDate.Date)
 	if err != nil {
 		return []dto.CarInformation{}, err

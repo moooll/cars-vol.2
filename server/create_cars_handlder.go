@@ -1,12 +1,12 @@
 package server
 
 import (
-	"log"
 	"os"
 	"time"
 
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/zap"
 
 	"cars/dto"
 )
@@ -15,9 +15,8 @@ func createCarsHandler(ctx *fasthttp.RequestCtx) {
 	reqBody := ctx.PostBody()
 	var carReq []dto.CreateCars
 	err := ffjson.Unmarshal(reqBody, &carReq)
-	log.Println(carReq)
 	if err != nil {
-		log.Println("could not unmarshal response: ", err)
+		zap.L().Error("could not unmarshal response: " + err.Error())
 		ctx.WriteString("server error, try later")
 	}
 	const layout = "2006-01-02T15:04:00Z03:00"
@@ -25,19 +24,20 @@ func createCarsHandler(ctx *fasthttp.RequestCtx) {
 	for i, v := range carReq {
 		carData[i].DateTime, err = time.Parse(layout, v.DateTime)
 		if err != nil {
-			log.Println("could not parse time", err)
+			zap.L().Error("could not parse time" + err.Error())
 			ctx.WriteString("check input and try later")
 		}
 		carData[i].CarNumber = v.CarNumber
 		carData[i].Speed = v.Speed
 	}
-	
-	err = writeToFile(carData)
-		if err != nil {
-			log.Println("could not write to file: ", err)
-			ctx.WriteString("error saving data, try later")
-		}
+
+	err = writeToFileVol2(carData)
+	if err != nil {
+		zap.L().Error("could not write to file: " + err.Error())
+		ctx.WriteString("error saving data, try later")
+	}
 }
+
 //todo: goroutines here??
 
 func writeToFile(carData []dto.CarInformation) (err error) {
@@ -48,7 +48,7 @@ func writeToFile(carData []dto.CarInformation) (err error) {
 		if _, er := os.Stat(filename); os.IsNotExist(er) {
 			fileNotExist = true
 		}
-		file, err := os.OpenFile("storage/" + filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
+		file, err := os.OpenFile("storage/"+filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 		if err != nil {
 			return err
 		}
@@ -63,9 +63,25 @@ func writeToFile(carData []dto.CarInformation) (err error) {
 		}
 		_, err = file.Write(dataMrshld)
 		_, err = file.WriteString(",")
-		if i ==  len(carData) - 1 {
+		if i == len(carData)-1 {
 			_, err = file.WriteString("]")
 		}
+	}
+	return nil
+}
+
+func writeToFileVol2(carData []dto.CarInformation) (err error) {
+
+	for _, v := range carData {
+		var filename = v.DateTime.Format("2006-01-02") + ".json"
+		file, err := os.OpenFile("storage/"+filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
+		if err != nil {
+			return err
+		}
+		carDataByte, err := ffjson.Marshal(v)
+		file.Write(carDataByte)
+		file.WriteString("\n")
+
 	}
 	return nil
 }
