@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"sort"
 	"time"
 
@@ -16,10 +17,10 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	var speedDateReq dto.SpeedDateReq
 	err := ffjson.Unmarshal(req, &speedDateReq)
 	if err != nil {
-		zap.L().Error("could not unmarshal request: " +  err.Error())
+		zap.L().Error("could not unmarshal request: " + err.Error())
 		ctx.WriteString("server error, try later")
 	}
-	
+
 	for i, v := range speedDateReq.Date {
 		if v == 'T' {
 			speedDateReq.Date = speedDateReq.Date[:i]
@@ -38,6 +39,9 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	exceededCars, err := findCarsWhichExceeded(speedDate)
 	if err != nil {
 		zap.L().Error("could not find cars: " + err.Error())
+		if err.Error() == "didn't find exceeded cars" {
+			ctx.WriteString("no cars exceeded")
+		}
 		ctx.WriteString("server error, try later")
 	}
 	resp, err := ffjson.Marshal(exceededCars)
@@ -55,8 +59,11 @@ func findCarsWhichExceeded(speedDate dto.SpeedDate) (exceededCars []dto.CarInfor
 	}
 
 	index := sort.Search(len(todaysCars), func(i int) bool {
-		return speedDate.Speed >= todaysCars[i].Speed
+		return speedDate.Speed < todaysCars[i].Speed
 	})
+	if index == len(todaysCars) {
+		return []dto.CarInformation{}, errors.New("didn't find exceeded cars")
+	}
 	exceededCars = todaysCars[index:]
 	return exceededCars, err
 }
