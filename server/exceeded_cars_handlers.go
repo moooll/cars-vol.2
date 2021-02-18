@@ -39,9 +39,6 @@ func exceededCarsHandler(ctx *fasthttp.RequestCtx) {
 	exceededCars, err := findCarsWhichExceeded(speedDate)
 	if err != nil {
 		zap.L().Error("could not find cars: " + err.Error())
-		// if err.Error() == "didn't find exceeded cars" {
-		// 	ctx.WriteString("no cars exceeded")
-		// }
 		ctx.WriteString("could not find cars\n")
 	}
 	resp, err := ffjson.Marshal(exceededCars)
